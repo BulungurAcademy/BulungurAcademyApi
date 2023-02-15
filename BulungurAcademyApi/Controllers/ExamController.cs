@@ -17,7 +17,7 @@ public class ExamController : ControllerBase
     {
         var creationExam = await this.service.CreateExamAsync(exam);
 
-        return Ok(creationExam);
+        return Created("", creationExam);
     }
 
     [HttpGet]
