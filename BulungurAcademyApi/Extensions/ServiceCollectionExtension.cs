@@ -17,16 +17,26 @@ public static class ServiceCollectionExtension
 {
     public static IServiceCollection AddDbContexts(
         this IServiceCollection services,
-        IConfiguration configuration)
+        WebApplicationBuilder builder)
     {
-        var connectionString=configuration.GetConnectionString("SqlServer");
+        var connectionString = builder.Configuration.GetConnectionString("DefaultConnectionString");
 
         services.AddDbContextPool<AppDbContext>(options =>
         {
-            options.UseSqlServer(connectionString, sqlServerOptions =>
+            if (builder.Environment.IsProduction())
             {
-                sqlServerOptions.EnableRetryOnFailure();
-            });
+                options.UseNpgsql(connectionString, npgsqlOptions =>
+                {
+                    npgsqlOptions.EnableRetryOnFailure();
+                });
+            }
+            else
+            {
+                options.UseNpgsql(connectionString, npgsqlOptions =>
+                {
+                    npgsqlOptions.EnableRetryOnFailure();
+                });
+            }
         });
 
         return services;
@@ -47,9 +57,9 @@ public static class ServiceCollectionExtension
         this IServiceCollection services)
     {
         services.AddScoped<IExamApplicantFatory, ExamApplicantFatory>();
-        services.AddScoped<IExamApplicantService,ExamApplicantService>();
+        services.AddScoped<IExamApplicantService, ExamApplicantService>();
         services.AddScoped<IExamFactory, ExamFactory>();
-        services.AddScoped<IExamService,ExamService>();
+        services.AddScoped<IExamService, ExamService>();
         services.AddScoped<ISubjectService, SubjectService>();
         services.AddScoped<IUserFactory, Userfactory>();
         services.AddScoped<IUserService, UserService>();

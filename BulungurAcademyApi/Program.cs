@@ -1,4 +1,3 @@
-
 using BulungurAcademy.Api.Extensions;
 using BulungurAcademy.Api.Middlewares;
 using System.Text.Json.Serialization;
@@ -12,7 +11,7 @@ namespace BulungurAcademyApi
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddDbContexts(builder.Configuration);
+            builder.Services.AddDbContexts(builder);
 
             builder.Services
                 .AddControllers()
@@ -55,21 +54,21 @@ namespace BulungurAcademyApi
             app.Run();
         }
 
-        public static void SetWebHook(
-        IApplicationBuilder builder,
-        IConfiguration configuration)
+        private static void SetWebHook(
+            IApplicationBuilder builder,
+            IConfiguration configuration)
         {
             using (var scope = builder.ApplicationServices.CreateScope())
             {
                 var botClient = scope.ServiceProvider.GetRequiredService<ITelegramBotClient>();
                 var baseUrl = configuration.GetSection("TelegramBot:BaseAddress").Value;
-                var webHookUrl = $"{baseUrl}/bot";
+                var webhookUrl = $"{baseUrl}/bot";
 
                 var webhookInfo = botClient.GetWebhookInfoAsync().Result;
 
-                if (webhookInfo is null || webhookInfo.Url != webHookUrl)
+                if (webhookInfo is null || webhookInfo.Url != webhookUrl)
                 {
-                    botClient.SetWebhookAsync(webHookUrl).Wait();
+                    botClient.SetWebhookAsync(webhookUrl).Wait();
                 }
             }
         }
